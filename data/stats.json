@@ -1,7 +1,7 @@
 {
-  "lastSynced": "2026-04-19T19:06:38.589Z",
-  "lastSyncStatus": "no-api-key",
-  "lastSyncMessage": "FOOTBALL_DATA_TOKEN not configured. Add it to GitHub Secrets to enable live sync.",
+  "lastSynced": "2026-05-26T01:38:52.676Z",
+  "lastSyncStatus": "ok",
+  "lastSyncMessage": "Sync successful. fetched 104 matches; processed standings.",
   "teams": {
     "Portugal": {
       "team": "Portugal",
