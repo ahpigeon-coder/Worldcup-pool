@@ -1,0 +1,42 @@
+name: Sync World Cup scores
+
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run sync
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: npm run sync
+
+      - name: Commit updated stats (if changed)
+        run: |
+          git config user.name "worldcup-pool-bot"
+          git config user.email "bot@users.noreply.github.com"
+          if [[ -n "$(git status --porcelain data/stats.json)" ]]; then
+            git add data/stats.json
+            git commit -m "chore: sync stats $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git push
+          else
+            echo "No stats changes."
+          fi
