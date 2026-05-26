@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Cup 2026 Pool — Live</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #121a2e;
+    --panel-2: #1a2540;
+    --ink: #e8ecf5;
+    --muted: #9aa5bd;
+    --accent: #ffcc33;
+    --accent-2: #ff6b6b;
+    --good: #5ee7a7;
+    --pot1: #ffcc33;
+    --pot2: #7dd3fc;
+    --pot3: #f472b6;
+    --border: #253155;
+    --shadow: 0 6px 24px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header {
+    padding: 20px 24px; background: linear-gradient(135deg, #1a2540, #0b1220);
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: .5px; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  .prizes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .prize { background: var(--panel-2); border: 1px solid var(--border); padding: 6px 10px; border-radius: 999px; font-size: 12px; color: var(--muted); }
+  .prize strong { color: var(--ink); }
+  .sync-status {
+    margin-top: 10px; font-size: 12px; color: var(--muted);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .sync-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .sync-status.ok .dot { background: var(--good); }
+  .sync-status.error .dot { background: var(--accent-2); }
+  .sync-status.pending .dot { background: var(--accent); }
+
+  nav.tabs { display: flex; gap: 2px; padding: 0 12px; background: var(--panel); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  nav.tabs button {
+    appearance: none; border: 0; background: transparent; color: var(--muted);
+    padding: 12px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  nav.tabs button:hover { color: var(--ink); }
+  main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  h2 { margin: 0 0 12px; font-size: 18px; }
+  h3 { margin: 0 0 8px; font-size: 15px; color: var(--muted); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  button.primary, button.secondary {
+    appearance: none; border: 0; border-radius: 8px; padding: 9px 14px;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: #111; }
+  button.secondary { background: var(--panel-2); color: var(--ink); border: 1px solid var(--border); }
+  button.secondary:hover { background: #233260; }
+
+  .pot-tag { display: inline-block; padding: 1px 7px; font-size: 10px; border-radius: 999px; font-weight: 700; letter-spacing: .5px; }
+  .pot-1 { background: var(--pot1); color: #111; }
+  .pot-2 { background: var(--pot2); color: #111; }
+  .pot-3 { background: var(--pot3); color: #111; }
+
+  .grid-players { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .player-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .player-card h4 { margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .player-card .pts { background: var(--accent); color: #111; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .team-line { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+  .team-line .name { flex: 1; }
+  .team-line .sub-pts { color: var(--muted); font-size: 11px; min-width: 40px; text-align: right; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; background: var(--panel); }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  .rank { font-weight: 700; color: var(--accent); width: 36px; }
+  .rank.gold { color: #ffcc33; }
+  .rank.silver { color: #c0c0c0; }
+  .rank.bronze { color: #cd7f32; }
+  .rank.top4 { color: var(--good); }
+
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .rules-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .rules-box h4 { margin: 0 0 8px; color: var(--accent); font-size: 14px; }
+  .rules-box ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .rules-box li { margin-bottom: 4px; }
+
+  .superstar-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px; font-size: 13px; }
+  .superstar-list div { padding: 4px 8px; background: var(--panel-2); border-radius: 6px; }
+  .superstar-list strong { color: var(--pot2); }
+
+  .teams-table td { font-size: 13px; }
+  .team-flag { font-size: 16px; }
+
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .error-box { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.4); color: #ffb4b4; padding: 12px; border-radius: 8px; }
+
+  footer { padding: 20px 24px; text-align: center; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌎🏆 World Cup 2026 Pool — Live</h1>
+  <p>Live standings. Auto-synced hourly from football-data.org.</p>
+  <div class="prizes">
+    <span class="prize"><strong>🥇 1st:</strong> Big Jackpot</span>
+    <span class="prize"><strong>🥈 2nd:</strong> Silver Stash</span>
+    <span class="prize"><strong>🥉 3rd:</strong> Bronze Payout</span>
+    <span class="prize"><strong>💵 4th:</strong> Money Back</span>
+  </div>
+  <div class="sync-status" id="sync-status"><span class="dot"></span><span id="sync-text">Loading…</span></div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="leaderboard" class="active">🏆 Leaderboard</button>
+  <button data-tab="draw">🎲 The Draw</button>
+  <button data-tab="teams">⚽ Team Stats</button>
+  <button data-tab="rules">📜 Rules</button>
+</nav>
+
+<main id="main">
+  <div class="loading">Loading pool data…</div>
+</main>
+
+<footer>
+  Data via <a href="https://www.football-data.org/" target="_blank" rel="noopener">football-data.org</a> · Synced every hour ·
+  Last sync: <span id="last-sync">—</span>
+</footer>
+
+<script>
+// =============== DATA LOADER ===============
+let config, draw, stats;
+
+async function loadData() {
+  try {
+    // Cache-bust with timestamp to force fresh fetches on GitHub Pages
+    const bust = "?t=" + Math.floor(Date.now() / 60000); // new param every minute
+    const [c, d, s] = await Promise.all([
+      fetch("data/config.json" + bust).then(r => r.json()),
+      fetch("data/draw.json" + bust).then(r => r.json()),
+      fetch("data/stats.json" + bust).then(r => r.json())
+    ]);
+    config = c; draw = d; stats = s;
+    render();
+    updateSyncStatus();
+  } catch (err) {
+    document.getElementById("main").innerHTML = `<div class="card error-box">⚠️ Failed to load pool data: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function updateSyncStatus() {
+  const el = document.getElementById("sync-status");
+  const textEl = document.getElementById("sync-text");
+  const lastEl = document.getElementById("last-sync");
+  const status = stats?.lastSyncStatus || "unknown";
+  const when = stats?.lastSynced ? new Date(stats.lastSynced) : null;
+  const whenLabel = when ? timeAgo(when) : "never";
+  el.className = "sync-status " + (status === "ok" ? "ok" : status === "error" || status === "no-api-key" ? "error" : "pending");
+  textEl.textContent = `Last sync: ${whenLabel} · ${stats?.lastSyncMessage || "(no status)"}`;
+  lastEl.textContent = when ? when.toLocaleString() : "—";
+}
+
+function timeAgo(date) {
+  const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (secs < 60) return "just now";
+  if (secs < 3600) return Math.floor(secs / 60) + "m ago";
+  if (secs < 86400) return Math.floor(secs / 3600) + "h ago";
+  return Math.floor(secs / 86400) + "d ago";
+}
+
+// =============== POINTS CALC ===============
+function teamPoints(teamName) {
+  const t = stats.teams?.[teamName];
+  if (!t) return { pts: 0, group: 0, ko: 0, bonus: 0 };
+
+  let group = 0;
+  if (t.groupFinish === 1) group = 3;
+  else if (t.groupFinish === 2) group = 2;
+  else if (t.groupFinish === 3) group = 1;
+
+  let ko = 0;
+  if (t.wonR32) ko += 2;
+  if (t.wonR16) ko += 3;
+  if (t.wonQF) ko += 4;
+  if (t.wonSF) ko += 5;
+  if (t.wonFinal) ko += 7;
+  else if (t.lostFinal) ko += 3;
+  if (t.wonThirdPlace) ko += 3;
+
+  let bonus = 0;
+  bonus += t.cleanSheets || 0;
+  bonus += t.pkWins || 0;
+  if (t.pot === 3) bonus += t.underdogWins || 0;
+  if (t.pot === 2) bonus += (t.superstarGoals || 0) + (t.superstarAssists || 0);
+
+  return { pts: group + ko + bonus, group, ko, bonus };
+}
+
+function playerPoints(entry) {
+  const p1 = teamPoints(entry.pot1);
+  const p2 = teamPoints(entry.pot2);
+  const p3 = teamPoints(entry.pot3);
+
+  const advancedAll =
+    stats.teams?.[entry.pot1]?.advancedKO &&
+    stats.teams?.[entry.pot2]?.advancedKO &&
+    stats.teams?.[entry.pot3]?.advancedKO;
+  const synergy = advancedAll ? 3 : 0;
+
+  return {
+    p1, p2, p3, synergy,
+    total: p1.pts + p2.pts + p3.pts + synergy,
+    groupTotal: p1.group + p2.group + p3.group,
+    koTotal: p1.ko + p2.ko + p3.ko,
+    bonusTotal: p1.bonus + p2.bonus + p3.bonus
+  };
+}
+
+// =============== RENDERING ===============
+function render() {
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <section class="tab active" id="tab-leaderboard"></section>
+    <section class="tab" id="tab-draw"></section>
+    <section class="tab" id="tab-teams"></section>
+    <section class="tab" id="tab-rules"></section>
+  `;
+  renderLeaderboard();
+  renderDraw();
+  renderTeams();
+  renderRules();
+  wireTabs();
+}
+
+function renderLeaderboard() {
+  const rows = draw.assignments.map(entry => ({ entry, pts: playerPoints(entry) }));
+  rows.sort((a, b) => b.pts.total - a.pts.total);
+
+  document.getElementById("tab-leaderboard").innerHTML = `
+    <div class="card">
+      <h2>🏆 Leaderboard</h2>
+      <p style="color:var(--muted); margin-top:-6px">Auto-sorted by total points. Top 4 = in the money.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Teams</th>
+              <th>Group</th>
+              <th>KO</th>
+              <th>Bonuses</th>
+              <th>Synergy</th>
+              <th style="text-align:right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((r, i) => {
+              const rank = i + 1;
+              const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : rank === 4 ? "top4" : "";
+              const rankIcon = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank === 4 ? "💵" : "";
+              return `<tr>
+                <td class="rank ${rankClass}">${rankIcon} ${rank}</td>
+                <td><strong>${escapeHtml(r.entry.player)}</strong></td>
+                <td style="font-size:12px; color:var(--muted)">
+                  <span class="pot-tag pot-1">1</span> ${escapeHtml(r.entry.pot1)}<br>
+                  <span class="pot-tag pot-2">2</span> ${escapeHtml(r.entry.pot2)}<br>
+                  <span class="pot-tag pot-3">3</span> ${escapeHtml(r.entry.pot3)}
+                </td>
+                <td>${r.pts.groupTotal}</td>
+                <td>${r.pts.koTotal}</td>
+                <td>${r.pts.bonusTotal}</td>
+                <td>${r.pts.synergy}</td>
+                <td style="text-align:right"><strong style="font-size:16px; color:${rank<=4?'var(--good)':'var(--ink)'}">${r.pts.total}</strong></td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderDraw() {
+  const html = draw.assignments.map(entry => {
+    const p = playerPoints(entry);
+    return `<div class="player-card">
+      <h4><span>${escapeHtml(entry.player)}</span><span class="pts">${p.total} pts</span></h4>
+      <div class="team-line"><span class="pot-tag pot-1">P1</span> <span class="name">${escapeHtml(entry.pot1)}</span> <span class="sub-pts">${p.p1.pts}</span></div>
+      <div class="team-line"><span class="pot-tag pot-2">P2</span> <span class="name">${escapeHtml(entry.pot2)} <small style="color:var(--muted)">(${escapeHtml(entry.superstar)})</small></span> <span class="sub-pts">${p.p2.pts}</span></div>
+      <div class="team-line"><span class="pot-tag pot-3">P3</span> <span class="name">${escapeHtml(entry.pot3)}</span> <span class="sub-pts">${p.p3.pts}</span></div>
+      ${p.synergy ? '<div style="margin-top:6px; color:var(--good); font-size:12px">🔥 Synergy bonus active: +3</div>' : ''}
+    </div>`;
+  }).join("");
+
+  document.getElementById("tab-draw").innerHTML = `
+    <div class="card">
+      <h2>🎲 The Draw</h2>
+      <p style="color:var(--muted); margin-top:-6px">16 players × 3 teams (Heavyweight + Mid-Tier + Underdog).</p>
+      <div class="grid-players">${html}</div>
+    </div>
+  `;
+}
+
+function renderTeams() {
+  const teams = stats.teams || {};
+  const grouped = { 1: [], 2: [], 3: [] };
+  for (const [name, t] of Object.entries(teams)) {
+    if (grouped[t.pot]) grouped[t.pot].push({ name, ...t });
+  }
+
+  let html = "";
+  [1, 2, 3].forEach(pot => {
+    const title = pot === 1 ? "Pot 1 — Heavyweights" : pot === 2 ? "Pot 2 — Mid-Tier" : "Pot 3 — Underdogs";
+    const rows = grouped[pot].sort((a, b) => a.name.localeCompare(b.name));
+    const rowHtml = rows.map(t => {
+      const tp = teamPoints(t.name);
+      const koChain = [
+        t.wonR32 && "R32",
+        t.wonR16 && "R16",
+        t.wonQF && "QF",
+        t.wonSF && "SF",
+        t.wonFinal && "🏆 WON FINAL",
+        t.lostFinal && "Runner-up",
+        t.wonThirdPlace && "3rd Place 🥉"
+      ].filter(Boolean).join(" · ");
+      const gf = t.groupFinish ? `${t.groupFinish}${["","st","nd","rd","th"][t.groupFinish]}` : "—";
+      return `<tr>
+        <td><strong>${escapeHtml(t.name)}</strong>${t.superstar ? `<br><small style="color:var(--muted)">⭐ ${escapeHtml(t.superstar)}</small>` : ""}</td>
+        <td>${gf}${t.advancedKO ? ' <span style="color:var(--good)">→ KO</span>' : ''}</td>
+        <td>${koChain || '<span style="color:var(--muted)">—</span>'}</td>
+        <td>${t.cleanSheets || 0}</td>
+        <td>${t.pkWins || 0}</td>
+        ${pot === 3 ? `<td>${t.underdogWins || 0}</td>` : ""}
+        ${pot === 2 ? `<td>${t.superstarGoals || 0} G / ${t.superstarAssists || 0} A</td>` : ""}
+        <td style="text-align:right"><strong>${tp.pts}</strong></td>
+      </tr>`;
+    }).join("");
+
+    html += `
+      <div class="card">
+        <h3><span class="pot-tag pot-${pot}">POT ${pot}</span> ${title}</h3>
+        <div style="overflow-x:auto">
+          <table class="teams-table">
+            <thead>
+              <tr>
+                <th>Team</th>
+                <th>Group</th>
+                <th>KO Progress</th>
+                <th>Clean Sheets</th>
+                <th>PK Wins</th>
+                ${pot === 3 ? "<th>Underdog Wins</th>" : ""}
+                ${pot === 2 ? "<th>⭐ Superstar</th>" : ""}
+                <th style="text-align:right">Pts</th>
+              </tr>
+            </thead>
+            <tbody>${rowHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("tab-teams").innerHTML = html;
+}
+
+function renderRules() {
+  const superstarHtml = config.pot2.map(x => `<div><strong>${escapeHtml(x.team)}:</strong> ${escapeHtml(x.superstar)}</div>`).join("");
+
+  document.getElementById("tab-rules").innerHTML = `
+    <div class="card">
+      <h2>📜 Pool Rules & Scoring</h2>
+      <div class="rules-grid">
+        <div class="rules-box">
+          <h4>⚽ Group Stage</h4>
+          <ul>
+            <li><strong>1st in group:</strong> 3 pts</li>
+            <li><strong>2nd in group:</strong> 2 pts</li>
+            <li><strong>3rd in group:</strong> 1 pt (even if eliminated)</li>
+            <li><strong>4th in group:</strong> 0 pts</li>
+          </ul>
+        </div>
+        <div class="rules-box">
+          <h4>🔥 Synergy Bonus</h4>
+          <ul><li>All 3 teams advance to knockouts: <strong>+3 pts</strong></li></ul>
+        </div>
+        <div class="rules-box">
+          <h4>⚔️ Knockouts (survivor mode)</h4>
+          <ul>
+            <li>Win in R32: <strong>2 pts</strong></li>
+            <li>Win in R16: <strong>3 pts</strong></li>
+            <li>Win in QF: <strong>4 pts</strong></li>
+            <li>Win in SF: <strong>5 pts</strong></li>
+            <li>Win Final (Champion): <strong>7 pts</strong></li>
+            <li>Runner-up (lost Final): <strong>3 pts</strong></li>
+            <li>Win 3rd-Place Match: <strong>3 pts</strong></li>
+          </ul>
+        </div>
+        <div class="rules-box">
+          <h4>🚀 Special Bonuses</h4>
+          <ul>
+            <li><strong>Clean Sheet:</strong> +1 pt per shutout (any pot)</li>
+            <li><strong>PK Shootout:</strong> +1 pt if team wins shootout</li>
+            <li><strong>Underdog Magic:</strong> +1 pt per Pot 3 win (group or KO)</li>
+          </ul>
+        </div>
+        <div class="rules-box">
+          <h4>🌟 Pot 2 Superstar</h4>
+          <ul>
+            <li><strong>Goal:</strong> +1 pt</li>
+            <li><strong>Assist:</strong> +1 pt</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px; background:var(--panel-2)">
+        <h3>🌟 Superstar Cheat Sheet</h3>
+        <div class="superstar-list">${superstarHtml}</div>
+      </div>
+
+      <div class="card" style="margin-top:16px; background:var(--panel-2)">
+        <h3>💰 Prize Pool</h3>
+        <ul style="color:var(--muted); padding-left:18px">
+          <li><strong style="color:var(--ink)">1st:</strong> The Big Jackpot 🥇</li>
+          <li><strong style="color:var(--ink)">2nd:</strong> Silver Stash 🥈</li>
+          <li><strong style="color:var(--ink)">3rd:</strong> Bronze Payout 🥉</li>
+          <li><strong style="color:var(--ink)">4th:</strong> Money back 💵</li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+function wireTabs() {
+  document.querySelectorAll("nav.tabs button").forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll("nav.tabs button").forEach(x => x.classList.remove("active"));
+      document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+    };
+  });
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+// =============== BOOT ===============
+loadData();
+// Re-poll every 2 minutes so viewers see updates without refresh
+setInterval(loadData, 120_000);
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-04-19T19:03:58.901Z",
+  "assignments": [
+    {
+      "player": "The Gaffer",
+      "pot1": "Portugal",
+      "pot2": "Türkiye",
+      "superstar": "Arda Güler",
+      "pot3": "Cape Verde"
+    },
+    {
+      "player": "Capitan Chaos",
+      "pot1": "Belgium",
+      "pot2": "Sweden",
+      "superstar": "Alexander Isak",
+      "pot3": "Saudi Arabia"
+    },
+    {
+      "player": "Nutmeg Nigel",
+      "pot1": "Netherlands",
+      "pot2": "Austria",
+      "superstar": "Christoph Baumgartner",
+      "pot3": "Jordan"
+    },
+    {
+      "player": "Panna Pete",
+      "pot1": "England",
+      "pot2": "Senegal",
+      "superstar": "Nicolas Jackson",
+      "pot3": "South Africa"
+    },
+    {
+      "player": "Corner Kicker Kev",
+      "pot1": "Japan",
+      "pot2": "Switzerland",
+      "superstar": "Breel Embolo",
+      "pot3": "DR Congo"
+    },
+    {
+      "player": "Offside Ollie",
+      "pot1": "Colombia",
+      "pot2": "Scotland",
+      "superstar": "Scott McTominay",
+      "pot3": "Tunisia"
+    },
+    {
+      "player": "VAR Victor",
+      "pot1": "Brazil",
+      "pot2": "South Korea",
+      "superstar": "Son Heung-min",
+      "pot3": "Qatar"
+    },
+    {
+      "player": "Golazo Gary",
+      "pot1": "France",
+      "pot2": "Canada",
+      "superstar": "Jonathan David",
+      "pot3": "Panama"
+    },
+    {
+      "player": "Benchwarmer Bruno",
+      "pot1": "Spain",
+      "pot2": "Croatia",
+      "superstar": "Andrej Kramarić",
+      "pot3": "Uzbekistan"
+    },
+    {
+      "player": "Header Henry",
+      "pot1": "USA",
+      "pot2": "Egypt",
+      "superstar": "Mohamed Salah",
+      "pot3": "Iran"
+    },
+    {
+      "player": "Bicycle Billy",
+      "pot1": "Morocco",
+      "pot2": "Ivory Coast",
+      "superstar": "Sébastien Haller",
+      "pot3": "Curaçao"
+    },
+    {
+      "player": "Rabona Ron",
+      "pot1": "Uruguay",
+      "pot2": "Paraguay",
+      "superstar": "Julio Enciso",
+      "pot3": "Australia"
+    },
+    {
+      "player": "Hat-trick Hank",
+      "pot1": "Norway",
+      "pot2": "Ghana",
+      "superstar": "Mohammed Kudus",
+      "pot3": "Algeria"
+    },
+    {
+      "player": "Own-goal Owen",
+      "pot1": "Germany",
+      "pot2": "Bosnia & Herz.",
+      "superstar": "Edin Džeko",
+      "pot3": "Iraq"
+    },
+    {
+      "player": "Pitchside Paul",
+      "pot1": "Mexico",
+      "pot2": "Ecuador",
+      "superstar": "Enner Valencia",
+      "pot3": "New Zealand"
+    },
+    {
+      "player": "Tiki-Taka Tony",
+      "pot1": "Argentina",
+      "pot2": "Czechia",
+      "superstar": "Patrik Schick",
+      "pot3": "Haiti"
+    }
+  ]
+}

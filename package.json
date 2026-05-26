@@ -1,0 +1,14 @@
+{
+  "name": "worldcup-pool-2026",
+  "version": "1.0.0",
+  "description": "Live World Cup 2026 pool dashboard — auto-synced from API-Football, hosted on GitHub Pages.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "draw": "node scripts/draw.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

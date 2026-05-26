@@ -1,0 +1,61 @@
+{
+  "tournamentName": "FIFA World Cup 2026",
+  "apiFootballLeagueId": 1,
+  "apiFootballSeason": 2026,
+  "adminPasswordHash": "CHANGE_ME_SEE_README",
+  "players": [
+    "The Gaffer",
+    "Capitan Chaos",
+    "Nutmeg Nigel",
+    "Panna Pete",
+    "Corner Kicker Kev",
+    "Offside Ollie",
+    "VAR Victor",
+    "Golazo Gary",
+    "Benchwarmer Bruno",
+    "Header Henry",
+    "Bicycle Billy",
+    "Rabona Ron",
+    "Hat-trick Hank",
+    "Own-goal Owen",
+    "Pitchside Paul",
+    "Tiki-Taka Tony"
+  ],
+  "pot1": [
+    "Spain","France","England","Argentina","Brazil","Germany","Portugal","Netherlands",
+    "Norway","Belgium","Colombia","USA","Uruguay","Morocco","Japan","Mexico"
+  ],
+  "pot2": [
+    {"team": "Egypt", "superstar": "Mohamed Salah"},
+    {"team": "South Korea", "superstar": "Son Heung-min"},
+    {"team": "Sweden", "superstar": "Alexander Isak"},
+    {"team": "Austria", "superstar": "Christoph Baumgartner"},
+    {"team": "Paraguay", "superstar": "Julio Enciso"},
+    {"team": "Switzerland", "superstar": "Breel Embolo"},
+    {"team": "Senegal", "superstar": "Nicolas Jackson"},
+    {"team": "Croatia", "superstar": "Andrej Kramarić"},
+    {"team": "Scotland", "superstar": "Scott McTominay"},
+    {"team": "Türkiye", "superstar": "Arda Güler"},
+    {"team": "Canada", "superstar": "Jonathan David"},
+    {"team": "Ecuador", "superstar": "Enner Valencia"},
+    {"team": "Ivory Coast", "superstar": "Sébastien Haller"},
+    {"team": "Czechia", "superstar": "Patrik Schick"},
+    {"team": "Ghana", "superstar": "Mohammed Kudus"},
+    {"team": "Bosnia & Herz.", "superstar": "Edin Džeko"}
+  ],
+  "pot3": [
+    "Saudi Arabia","Jordan","Uzbekistan","New Zealand","Haiti","Curaçao","Iraq","Panama",
+    "Qatar","South Africa","Tunisia","Cape Verde","DR Congo","Australia","Algeria","Iran"
+  ],
+  "apiFootballNameAliases": {
+    "USA": ["United States", "United States of America"],
+    "South Korea": ["Korea Republic", "Republic of Korea"],
+    "Türkiye": ["Turkey", "Turkiye"],
+    "Czechia": ["Czech Republic"],
+    "Ivory Coast": ["Cote d'Ivoire", "Côte d'Ivoire"],
+    "DR Congo": ["Congo DR", "Democratic Republic of the Congo"],
+    "Bosnia & Herz.": ["Bosnia and Herzegovina", "Bosnia & Herzegovina", "Bosnia-Herzegovina"],
+    "Curaçao": ["Curacao"],
+    "Cape Verde": ["Cape Verde Islands", "Cabo Verde"]
+  }
+}
