@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Draw — World Cup 2026 Pool</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #121a2e;
+    --panel-2: #1a2540;
+    --ink: #e8ecf5;
+    --muted: #9aa5bd;
+    --accent: #ffcc33;
+    --accent-2: #ff6b6b;
+    --good: #5ee7a7;
+    --pot1: #ffcc33;
+    --pot2: #7dd3fc;
+    --pot3: #f472b6;
+    --border: #253155;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: radial-gradient(ellipse at center, #1a2540 0%, #0b1220 70%);
+    color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px; min-height: 100vh; display: flex; flex-direction: column; }
+  header { text-align: center; margin-bottom: 30px; }
+  header h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    margin: 0; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--good) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    font-weight: 900;
+  }
+  header p { color: var(--muted); margin: 8px 0 0; font-size: 16px; }
+  .progress {
+    margin: 0 auto 30px; display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 600px;
+  }
+  .progress-dot {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--panel);
+    border: 2px solid var(--border); font-size: 10px; display: flex;
+    align-items: center; justify-content: center; color: var(--muted);
+    transition: all .3s;
+  }
+  .progress-dot.done { background: var(--good); border-color: var(--good); color: #0b1220; font-weight: 700; }
+  .progress-dot.current { background: var(--accent); border-color: var(--accent); color: #0b1220; font-weight: 700; transform: scale(1.2); box-shadow: 0 0 20px var(--accent); }
+  .stage {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    min-height: 400px;
+  }
+  .stage-inner { width: 100%; text-align: center; }
+  button.big {
+    appearance: none; border: 0; border-radius: 16px;
+    padding: 24px 56px; font-size: 22px; font-weight: 800;
+    cursor: pointer; transition: all .2s; letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--accent), #ff9933);
+    color: #0b1220;
+    box-shadow: 0 8px 30px rgba(255, 204, 51, .4);
+  }
+  button.big:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(255, 204, 51, .6); }
+  button.big:active { transform: translateY(0); }
+  button.big:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+  button.secondary {
+    appearance: none; border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+    background: var(--panel-2); color: var(--ink);
+  }
+  button.secondary:hover { background: #2a3a5e; }
+
+  /* ---------- IDLE state ---------- */
+  .idle h2 { font-size: 28px; margin-bottom: 16px; }
+  .idle p { color: var(--muted); margin-bottom: 32px; font-size: 16px; line-height: 1.6; }
+
+  /* ---------- REVEALING state ---------- */
+  .pick-label { color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+  .player-name {
+    font-size: clamp(40px, 7vw, 80px);
+    font-weight: 900;
+    margin: 0 0 32px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: namePop .6s ease-out;
+  }
+  @keyframes namePop {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .teams-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    max-width: 900px; margin: 0 auto;
+  }
+  @media (max-width: 700px) {
+    .teams-grid { grid-template-columns: 1fr; }
+  }
+  .team-card {
+    background: var(--panel); border: 2px solid var(--border); border-radius: 16px;
+    padding: 24px 16px; min-height: 180px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    opacity: 0;
+  }
+  .team-card.revealed { opacity: 1; animation: teamReveal .6s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes teamReveal {
+    0% { transform: rotateY(180deg) scale(0.6); opacity: 0; }
+    100% { transform: rotateY(0) scale(1); opacity: 1; }
+  }
+  .team-card .pot-badge {
+    position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 2px 8px;
+    border-radius: 999px; font-weight: 800; letter-spacing: 1px;
+  }
+  .team-card.pot-1 { border-color: var(--pot1); box-shadow: 0 0 25px rgba(255,204,51,.3); }
+  .team-card.pot-1 .pot-badge { background: var(--pot1); color: #0b1220; }
+  .team-card.pot-2 { border-color: var(--pot2); box-shadow: 0 0 25px rgba(125,211,252,.3); }
+  .team-card.pot-2 .pot-badge { background: var(--pot2); color: #0b1220; }
+  .team-card.pot-3 { border-color: var(--pot3); box-shadow: 0 0 25px rgba(244,114,182,.3); }
+  .team-card.pot-3 .pot-badge { background: var(--pot3); color: #0b1220; }
+  .team-card .pot-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .team-card .team-name { font-size: 28px; font-weight: 800; line-height: 1.1; }
+  .team-card .superstar { color: var(--pot2); margin-top: 6px; font-size: 13px; }
+  .team-card.placeholder { background: var(--panel); opacity: .3; }
+  .team-card.placeholder::before { content: "?"; font-size: 60px; color: var(--muted); font-weight: 900; }
+
+  .controls { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- DONE state ---------- */
+  .final-table {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; margin-top: 24px; max-height: 50vh; overflow-y: auto;
+  }
+  .final-table table { width: 100%; border-collapse: collapse; }
+  .final-table th, .final-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
+  .final-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .json-box {
+    background: #0b1220; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; margin-top: 16px; max-height: 200px; overflow: auto;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--muted);
+    text-align: left;
+  }
+  .lock-instructions {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-top: 20px; text-align: left; font-size: 14px; color: var(--muted);
+  }
+  .lock-instructions ol { margin: 8px 0 0 20px; padding: 0; }
+  .lock-instructions li { margin-bottom: 6px; }
+  .lock-instructions a { color: var(--accent); }
+
+  /* ---------- Confetti ---------- */
+  .confetti {
+    position: fixed; top: -10px; width: 10px; height: 10px;
+    border-radius: 2px; pointer-events: none;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  .top-nav {
+    display: flex; gap: 12px; justify-content: center; margin-bottom: 16px;
+  }
+  .top-nav a {
+    color: var(--muted); text-decoration: none; font-size: 13px; padding: 6px 12px;
+    border-radius: 6px; transition: all .15s;
+  }
+  .top-nav a:hover { color: var(--ink); background: var(--panel-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top-nav">
+    <a href="./">← Back to Live Dashboard</a>
+  </nav>
+  <header>
+    <h1>🌎🏆 THE DRAW</h1>
+    <p>World Cup 2026 Pool — Live Draw Ceremony</p>
+  </header>
+
+  <div class="progress" id="progress"></div>
+  <div class="stage"><div class="stage-inner" id="stage"></div></div>
+</div>
+
+<script>
+let config = null;
+let draw = [];          // [{player, pot1, pot2, superstar, pot3}, ...]
+let currentIdx = -1;    // which pick we're on (-1 = not started)
+let currentReveal = 0;  // 0 = not revealed, 1 = pot1 shown, 2 = pot2 shown, 3 = all shown
+
+async function loadConfig() {
+  const bust = "?t=" + Math.floor(Date.now()/60000);
+  const r = await fetch("data/config.json" + bust);
+  config = await r.json();
+  renderIdle();
+}
+
+function shuffle(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function generateDraw() {
+  const n = Math.min(config.players.length, config.pot1.length, config.pot2.length, config.pot3.length);
+  const p1 = shuffle(config.pot1).slice(0, n);
+  const p2 = shuffle(config.pot2).slice(0, n);
+  const p3 = shuffle(config.pot3).slice(0, n);
+  // Shuffle players too so the reveal order is also random
+  const players = shuffle(config.players).slice(0, n);
+  return players.map((player, i) => ({
+    player,
+    pot1: p1[i],
+    pot2: p2[i].team,
+    superstar: p2[i].superstar,
+    pot3: p3[i]
+  }));
+}
+
+function renderProgress() {
+  const el = document.getElementById("progress");
+  if (currentIdx < 0) { el.innerHTML = ""; return; }
+  el.innerHTML = draw.map((_, i) => {
+    const cls = i < currentIdx ? "done" : i === currentIdx ? "current" : "";
+    return `<div class="progress-dot ${cls}">${i+1}</div>`;
+  }).join("");
+}
+
+function renderIdle() {
+  document.getElementById("stage").innerHTML = `
+    <div class="idle">
+      <h2>Ready to draw?</h2>
+      <p>${config.players.length} friends. 3 teams each (Heavyweight, Mid-Tier, Underdog).<br>
+      Hit start, then reveal each pick one by one. Make it dramatic.</p>
+      <button class="big" onclick="startDraw()">🎲 START THE DRAW</button>
+    </div>
+  `;
+}
+
+function startDraw() {
+  draw = generateDraw();
+  currentIdx = 0;
+  currentReveal = 0;
+  renderProgress();
+  renderPick();
+}
+
+function renderPick() {
+  if (currentIdx >= draw.length) { renderDone(); return; }
+  const pick = draw[currentIdx];
+
+  const card = (potNum, teamName, superstar, revealed) => {
+    const potLabel = potNum === 1 ? "Heavyweight" : potNum === 2 ? "Mid-Tier" : "Underdog";
+    if (!revealed) return `<div class="team-card placeholder"></div>`;
+    return `<div class="team-card pot-${potNum} revealed">
+      <span class="pot-badge">POT ${potNum}</span>
+      <div class="pot-label">${potLabel}</div>
+      <div class="team-name">${escapeHtml(teamName)}</div>
+      ${superstar ? `<div class="superstar">⭐ ${escapeHtml(superstar)}</div>` : ''}
+    </div>`;
+  };
+
+  let buttonHtml = "";
+  if (currentReveal === 0) {
+    buttonHtml = `<button class="big" onclick="revealNext()">🔮 REVEAL TEAMS</button>`;
+  } else if (currentReveal < 3) {
+    buttonHtml = `<button class="big" onclick="revealNext()">▶️ NEXT TEAM</button>`;
+  } else {
+    const isLast = currentIdx === draw.length - 1;
+    buttonHtml = `<button class="big" onclick="nextPick()">${isLast ? "🏆 FINISH" : "➡️ NEXT PICK"}</button>`;
+  }
+
+  document.getElementById("stage").innerHTML = `
+    <div>
+      <div class="pick-label">Pick ${currentIdx + 1} of ${draw.length}</div>
+      <h2 class="player-name">${escapeHtml(pick.player)}</h2>
+      <div class="teams-grid">
+        ${card(1, pick.pot1, null, currentReveal >= 1)}
+        ${card(2, pick.pot2, pick.superstar, currentReveal >= 2)}
+        ${card(3, pick.pot3, null, currentReveal >= 3)}
+      </div>
+      <div class="controls">${buttonHtml}</div>
+    </div>
+  `;
+}
+
+function revealNext() {
+  currentReveal++;
+  renderPick();
+}
+
+function nextPick() {
+  currentIdx++;
+  currentReveal = 0;
+  renderProgress();
+  renderPick();
+}
+
+function renderDone() {
+  // Confetti
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => spawnConfetti(), i * 30);
+  }
+
+  const rows = draw.map(d => `<tr>
+    <td><strong>${escapeHtml(d.player)}</strong></td>
+    <td><span style="color:var(--pot1)">${escapeHtml(d.pot1)}</span></td>
+    <td><span style="color:var(--pot2)">${escapeHtml(d.pot2)}</span> <small style="color:var(--muted)">(⭐ ${escapeHtml(d.superstar)})</small></td>
+    <td><span style="color:var(--pot3)">${escapeHtml(d.pot3)}</span></td>
+  </tr>`).join("");
+
+  // Build the draw.json content
+  const drawJson = {
+    generatedAt: new Date().toISOString(),
+    assignments: draw
+  };
+  const jsonStr = JSON.stringify(drawJson, null, 2);
+
+  document.getElementById("stage").innerHTML = `
+    <div>
+      <div class="pick-label">🎉 Complete</div>
+      <h2 class="player-name" style="font-size:48px">All picks revealed!</h2>
+
+      <div class="final-table">
+        <table>
+          <thead><tr><th>Player</th><th>P1 Heavyweight</th><th>P2 Mid-Tier</th><th>P3 Underdog</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+
+      <div class="controls">
+        <button class="big" onclick="startDraw()">🔄 RE-SHUFFLE</button>
+        <button class="secondary" onclick="copyDraw()">📋 Copy draw.json</button>
+      </div>
+
+      <div class="lock-instructions">
+        <strong>🔒 Lock this draw permanently?</strong>
+        <p style="margin:8px 0">This draw only lives in your browser right now. To make it the official draw everyone sees on the dashboard:</p>
+        <ol>
+          <li>Click <strong>📋 Copy draw.json</strong> above</li>
+          <li>Open <a href="https://github.com/ahpigeon-coder/Worldcup-pool/edit/main/data/draw.json" target="_blank">data/draw.json in GitHub</a></li>
+          <li>Select all (Cmd/Ctrl+A), paste, commit</li>
+          <li>Refresh the dashboard — the new draw is now live for everyone</li>
+        </ol>
+        <details style="margin-top:12px">
+          <summary style="cursor:pointer; color:var(--accent)">Show JSON to paste</summary>
+          <pre class="json-box" id="json-box">${escapeHtml(jsonStr)}</pre>
+        </details>
+      </div>
+    </div>
+  `;
+  window._lastDrawJson = jsonStr;
+}
+
+function copyDraw() {
+  const text = window._lastDrawJson || "";
+  navigator.clipboard.writeText(text).then(
+    () => alert("✅ Copied! Now paste into data/draw.json in GitHub."),
+    () => alert("❌ Copy failed — open the 'Show JSON' section and copy manually.")
+  );
+}
+
+function spawnConfetti() {
+  const colors = ["#ffcc33","#ff6b6b","#5ee7a7","#7dd3fc","#f472b6","#ff9933"];
+  const c = document.createElement("div");
+  c.className = "confetti";
+  c.style.left = Math.random() * 100 + "vw";
+  c.style.background = colors[Math.floor(Math.random() * colors.length)];
+  c.style.animationDuration = (2 + Math.random() * 2) + "s";
+  c.style.width = (6 + Math.random() * 8) + "px";
+  c.style.height = c.style.width;
+  document.body.appendChild(c);
+  setTimeout(() => c.remove(), 4500);
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+loadConfig();
+</script>
+</body>
+</html>
+
