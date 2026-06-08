@@ -1,7 +1,7 @@
 {
-  "lastSynced": "2026-06-08T19:29:43.767Z",
-  "lastSyncStatus": "ok",
-  "lastSyncMessage": "Sync successful. fetched 104 matches; processed standings.",
+  "lastSynced": "2026-06-08T21:58:05.362Z",
+  "lastSyncStatus": "no-matches",
+  "lastSyncMessage": "No matches found for WC 2026 yet. Check again after the fixtures are published.",
   "teams": {
     "Portugal": {
       "team": "Portugal",
