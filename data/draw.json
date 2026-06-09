@@ -14,7 +14,7 @@
     { "player": "Artush",    "pot1": "Morocco",     "pot2": "Ivory Coast",    "superstar": "Amad Diallo",         "pot3": "Curaçao" },
     { "player": "Valentino", "pot1": "Uruguay",     "pot2": "Paraguay",       "superstar": "Julio Enciso",        "pot3": "Australia" },
     { "player": "Jake",      "pot1": "Norway",      "pot2": "Ghana",          "superstar": "Antoine Semenyo",     "pot3": "Algeria" },
-    { "player": "Collin",    "pot1": "Germany",     "pot2": "Bosnia & Herz.", "superstar": "Edin Džeko",          "pot3": "Iraq" },
+    { "player": "Sam",    "pot1": "Germany",     "pot2": "Bosnia & Herz.", "superstar": "Edin Džeko",          "pot3": "Iraq" },
     { "player": "Owen",      "pot1": "Mexico",      "pot2": "Ecuador",        "superstar": "Enner Valencia",      "pot3": "New Zealand" },
     { "player": "Robert",    "pot1": "Argentina",   "pot2": "Czechia",        "superstar": "Patrik Schick",       "pot3": "Haiti" }
   ]
