@@ -1,7 +1,7 @@
 {
-  "lastSynced": "2026-06-09T04:19:01.116Z",
-  "lastSyncStatus": "ok",
-  "lastSyncMessage": "Sync successful. fetched 104 matches; standings failed: fetch failed.",
+  "lastSynced": "2026-06-09T08:38:00.385Z",
+  "lastSyncStatus": "error",
+  "lastSyncMessage": "Matches fetch failed: fetch failed",
   "teams": {
     "Netherlands": {
       "team": "Netherlands",
@@ -766,7 +766,7 @@
     "Paraguay": {
       "team": "Paraguay",
       "pot": 2,
-      "superstar": "Julio Enciso",
+      "superstar": "Miguel Almirón",
       "groupFinish": 0,
       "advancedKO": false,
       "wonR32": false,
