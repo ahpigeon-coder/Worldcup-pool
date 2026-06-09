@@ -1,21 +1,117 @@
 {
-  "generatedAt": "2026-06-02T00:30:00.000Z",
+  "generatedAt": "2026-06-09T01:11:30.337Z",
   "assignments": [
-    { "player": "Armand",    "pot1": "Portugal",    "pot2": "Türkiye",        "superstar": "Arda Güler",          "pot3": "Cape Verde" },
-    { "player": "Wyatt",     "pot1": "Belgium",     "pot2": "Sweden",         "superstar": "Alexander Isak",      "pot3": "Saudi Arabia" },
-    { "player": "Mitch",     "pot1": "Netherlands", "pot2": "Austria",        "superstar": "Marko Arnautović",    "pot3": "Jordan" },
-    { "player": "Joe",       "pot1": "England",     "pot2": "Senegal",        "superstar": "Sadio Mané",          "pot3": "South Africa" },
-    { "player": "Kai",       "pot1": "Japan",       "pot2": "Switzerland",    "superstar": "Breel Embolo",        "pot3": "DR Congo" },
-    { "player": "JJ",        "pot1": "Colombia",    "pot2": "Scotland",       "superstar": "Scott McTominay",     "pot3": "Tunisia" },
-    { "player": "Mr. Russo", "pot1": "Brazil",      "pot2": "South Korea",    "superstar": "Son Heung-min",       "pot3": "Qatar" },
-    { "player": "Collin",    "pot1": "France",      "pot2": "Canada",         "superstar": "Jonathan David",      "pot3": "Panama" },
-    { "player": "Mr.Burris", "pot1": "Spain",       "pot2": "Croatia",        "superstar": "Andrej Kramarić",     "pot3": "Uzbekistan" },
-    { "player": "Keeks",     "pot1": "USA",         "pot2": "Egypt",          "superstar": "Mohamed Salah",       "pot3": "Iran" },
-    { "player": "Artush",    "pot1": "Morocco",     "pot2": "Ivory Coast",    "superstar": "Amad Diallo",         "pot3": "Curaçao" },
-    { "player": "Valentino", "pot1": "Uruguay",     "pot2": "Paraguay",       "superstar": "Julio Enciso",        "pot3": "Australia" },
-    { "player": "Jake",      "pot1": "Norway",      "pot2": "Ghana",          "superstar": "Antoine Semenyo",     "pot3": "Algeria" },
-    { "player": "Sam",    "pot1": "Germany",     "pot2": "Bosnia & Herz.", "superstar": "Edin Džeko",          "pot3": "Iraq" },
-    { "player": "Owen",      "pot1": "Mexico",      "pot2": "Ecuador",        "superstar": "Enner Valencia",      "pot3": "New Zealand" },
-    { "player": "Robert",    "pot1": "Argentina",   "pot2": "Czechia",        "superstar": "Patrik Schick",       "pot3": "Haiti" }
+    {
+      "player": "Mitch",
+      "pot1": "Netherlands",
+      "pot2": "Sweden",
+      "superstar": "Alexander Isak",
+      "pot3": "South Africa"
+    },
+    {
+      "player": "Valentino",
+      "pot1": "England",
+      "pot2": "Bosnia & Herz.",
+      "superstar": "Edin Džeko",
+      "pot3": "Tunisia"
+    },
+    {
+      "player": "Wyatt",
+      "pot1": "USA",
+      "pot2": "Ivory Coast",
+      "superstar": "Amad Diallo",
+      "pot3": "Jordan"
+    },
+    {
+      "player": "Jake",
+      "pot1": "Norway",
+      "pot2": "Croatia",
+      "superstar": "Andrej Kramarić",
+      "pot3": "New Zealand"
+    },
+    {
+      "player": "Owen",
+      "pot1": "Portugal",
+      "pot2": "Ecuador",
+      "superstar": "Enner Valencia",
+      "pot3": "Curaçao"
+    },
+    {
+      "player": "JJ",
+      "pot1": "France",
+      "pot2": "Ghana",
+      "superstar": "Antoine Semenyo",
+      "pot3": "Panama"
+    },
+    {
+      "player": "Mr. Russo",
+      "pot1": "Colombia",
+      "pot2": "Türkiye",
+      "superstar": "Arda Güler",
+      "pot3": "Uzbekistan"
+    },
+    {
+      "player": "Keeks",
+      "pot1": "Brazil",
+      "pot2": "Canada",
+      "superstar": "Jonathan David",
+      "pot3": "DR Congo"
+    },
+    {
+      "player": "Joe",
+      "pot1": "Spain",
+      "pot2": "Czechia",
+      "superstar": "Patrik Schick",
+      "pot3": "Haiti"
+    },
+    {
+      "player": "Kai",
+      "pot1": "Mexico",
+      "pot2": "Scotland",
+      "superstar": "Scott McTominay",
+      "pot3": "Saudi Arabia"
+    },
+    {
+      "player": "Collin",
+      "pot1": "Japan",
+      "pot2": "Senegal",
+      "superstar": "Sadio Mané",
+      "pot3": "Iraq"
+    },
+    {
+      "player": "Robert",
+      "pot1": "Morocco",
+      "pot2": "South Korea",
+      "superstar": "Son Heung-min",
+      "pot3": "Cape Verde"
+    },
+    {
+      "player": "Sam",
+      "pot1": "Belgium",
+      "pot2": "Switzerland",
+      "superstar": "Breel Embolo",
+      "pot3": "Australia"
+    },
+    {
+      "player": "Mr.Burris",
+      "pot1": "Argentina",
+      "pot2": "Paraguay",
+      "superstar": "Julio Enciso",
+      "pot3": "Qatar"
+    },
+    {
+      "player": "Artush",
+      "pot1": "Germany",
+      "pot2": "Austria",
+      "superstar": "Marko Arnautović",
+      "pot3": "Algeria"
+    },
+    {
+      "player": "Armand",
+      "pot1": "Uruguay",
+      "pot2": "Egypt",
+      "superstar": "Mohamed Salah",
+      "pot3": "Iran"
+    }
   ]
 }
