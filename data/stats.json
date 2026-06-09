@@ -1,7 +1,7 @@
 {
-  "lastSynced": "2026-06-08T23:19:10.038Z",
-  "lastSyncStatus": "no-matches",
-  "lastSyncMessage": "No matches found for WC 2026 yet. Check again after the fixtures are published.",
+  "lastSynced": "2026-06-09T00:55:21.235Z",
+  "lastSyncStatus": "error",
+  "lastSyncMessage": "Matches fetch failed: fetch failed",
   "teams": {
     "Portugal": {
       "team": "Portugal",
@@ -139,7 +139,7 @@
     "Austria": {
       "team": "Austria",
       "pot": 2,
-      "superstar": "Christoph Baumgartner",
+      "superstar": "Marko Arnautović",
       "groupFinish": 0,
       "advancedKO": false,
       "wonR32": false,
@@ -196,7 +196,7 @@
     "Senegal": {
       "team": "Senegal",
       "pot": 2,
-      "superstar": "Nicolas Jackson",
+      "superstar": "Sadio Mané",
       "groupFinish": 0,
       "advancedKO": false,
       "wonR32": false,
@@ -595,7 +595,7 @@
     "Ivory Coast": {
       "team": "Ivory Coast",
       "pot": 2,
-      "superstar": "Sébastien Haller",
+      "superstar": "Amad Diallo",
       "groupFinish": 0,
       "advancedKO": false,
       "wonR32": false,
@@ -709,7 +709,7 @@
     "Ghana": {
       "team": "Ghana",
       "pot": 2,
-      "superstar": "Mohammed Kudus",
+      "superstar": "Antoine Semenyo",
       "groupFinish": 0,
       "advancedKO": false,
       "wonR32": false,
