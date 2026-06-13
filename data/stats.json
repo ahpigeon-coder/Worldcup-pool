@@ -1,7 +1,7 @@
 {
-  "lastSynced": "2026-06-13T04:43:06.897Z",
-  "lastSyncStatus": "ok",
-  "lastSyncMessage": "Sync successful. fetched 104 matches; processed standings.",
+  "lastSynced": "2026-06-13T08:29:39.507Z",
+  "lastSyncStatus": "error",
+  "lastSyncMessage": "Matches fetch failed: fetch failed",
   "teams": {
     "Netherlands": {
       "team": "Netherlands",
@@ -529,7 +529,7 @@
       "wonFinal": false,
       "wonThirdPlace": false,
       "lostFinal": false,
-      "cleanSheets": 1,
+      "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
       "superstarGoals": 0,
