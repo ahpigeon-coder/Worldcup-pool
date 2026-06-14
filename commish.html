@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Commish — World Cup 2026 Pool</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #121a2e;
+    --panel-2: #1a2540;
+    --ink: #e8ecf5;
+    --muted: #9aa5bd;
+    --accent: #ffcc33;
+    --accent-2: #ff6b6b;
+    --good: #5ee7a7;
+    --pot2: #7dd3fc;
+    --border: #253155;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 24px; background: linear-gradient(135deg, #1a2540, #0b1220); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 0 4px; font-size: 22px; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  main { padding: 20px; max-width: 900px; margin: 0 auto; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 10px; font-size: 16px; }
+  .card p { color: var(--muted); margin: 0 0 8px; font-size: 13px; }
+  input[type=text], input[type=password] {
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px; font: inherit; width: 100%; font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+  }
+  button {
+    appearance: none; border: 0; border-radius: 8px;
+    padding: 8px 14px; font-weight: 600; font-size: 13px; cursor: pointer;
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--border);
+  }
+  button.primary { background: var(--accent); color: #111; border: 0; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.danger { background: var(--accent-2); color: #fff; border: 0; }
+  button.good { background: var(--good); color: #111; border: 0; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+
+  .row { display: grid; grid-template-columns: 1fr 100px 100px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: 0; }
+  .team-name { font-weight: 700; }
+  .superstar { color: var(--pot2); font-size: 12px; }
+  .counter { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .counter button { width: 32px; height: 32px; padding: 0; font-size: 18px; font-weight: 800; }
+  .counter button.minus { background: var(--accent-2); color: #fff; border: 0; }
+  .counter button.plus { background: var(--good); color: #111; border: 0; }
+  .counter .val { font-weight: 800; font-size: 16px; min-width: 24px; text-align: center; }
+  .pending { color: var(--accent); }
+  .pending::after { content: " *"; }
+
+  .top-nav { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+  .top-nav a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 6px; }
+  .top-nav a:hover { color: var(--ink); background: var(--panel-2); }
+
+  .col-head { display: grid; grid-template-columns: 1fr 100px 100px; gap: 10px; padding: 6px 0; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); }
+
+  .status { padding: 10px 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; }
+  .status.ok { background: rgba(94,231,167,.12); color: var(--good); border: 1px solid rgba(94,231,167,.4); }
+  .status.err { background: rgba(255,107,107,.12); color: #ffb4b4; border: 1px solid rgba(255,107,107,.4); }
+  .status.info { background: rgba(125,211,252,.12); color: #c6e7fb; border: 1px solid rgba(125,211,252,.4); }
+
+  details summary { cursor: pointer; color: var(--accent); padding: 4px 0; }
+  details > div { margin-top: 8px; }
+  pre { background: #0b1220; border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow: auto; font-size: 11px; max-height: 280px; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; background: var(--panel-2); padding: 1px 5px; border-radius: 4px; }
+
+  .button-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .pill { display: inline-block; padding: 1px 8px; font-size: 10px; border-radius: 999px; background: var(--accent); color: #111; font-weight: 700; margin-left: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎮 Commish Override Panel</h1>
+  <p>Manually log Superstar goals & assists. Commits to GitHub, survives auto-syncs.</p>
+</header>
+<main>
+  <nav class="top-nav">
+    <a href="./">← Back to Live Dashboard</a>
+  </nav>
+
+  <!-- AUTH GATE -->
+  <div class="card" id="auth-card">
+    <h2>🔒 Commish password</h2>
+    <p>Enter your password to unlock the editor. Set it in code (default: <code>wc2026</code>).</p>
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password" />
+    <div class="button-row">
+      <button class="primary" onclick="unlock()">Unlock</button>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div id="panel" style="display:none">
+    <!-- GitHub PAT setup -->
+    <div class="card">
+      <h2>🔑 GitHub Personal Access Token <span class="pill" id="pat-pill">unset</span></h2>
+      <p>One-time setup for one-tap commits. Without a PAT, you'll use copy/paste mode.</p>
+      <details>
+        <summary>How to create a PAT (1 min)</summary>
+        <div style="color:var(--muted); font-size:13px">
+          <ol>
+            <li>Open <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--accent)">github.com/settings/tokens (fine-grained)</a></li>
+            <li>Click <strong>Generate new token</strong></li>
+            <li>Name: "Worldcup Pool Commish" · Expiration: pick any (longer = less hassle)</li>
+            <li>Repository access: <strong>Only select repositories → Worldcup-pool</strong></li>
+            <li>Permissions → Repository permissions → <strong>Contents: Read and write</strong></li>
+            <li>Generate token, copy it, paste below.</li>
+          </ol>
+          The token is stored ONLY in your browser's localStorage. Never sent anywhere except api.github.com.
+        </div>
+      </details>
+      <div style="margin-top:10px">
+        <input type="password" id="pat" placeholder="github_pat_..." />
+      </div>
+      <div class="button-row">
+        <button class="primary" onclick="savePat()">💾 Save PAT</button>
+        <button class="danger" onclick="clearPat()">🗑️ Clear PAT</button>
+      </div>
+    </div>
+
+    <!-- Superstar overrides -->
+    <div class="card">
+      <h2>🌟 Superstar Goals & Assists</h2>
+      <p>Hit + when your superstar scores or assists. Hit − to undo. Pending changes are highlighted yellow.</p>
+      <div class="col-head">
+        <div>Team / Superstar</div>
+        <div style="text-align:center">Goals</div>
+        <div style="text-align:center">Assists</div>
+      </div>
+      <div id="rows">Loading…</div>
+    </div>
+
+    <!-- Commit -->
+    <div class="card">
+      <h2>📤 Publish changes</h2>
+      <p>Pending changes are only stored in your browser until you publish. Top tip: bookmark this page for quick access during matches.</p>
+      <div class="button-row">
+        <button class="primary" id="btn-commit" onclick="commit()">🚀 Sync to GitHub</button>
+        <button onclick="copyJSON()">📋 Copy stats.json (fallback)</button>
+        <button onclick="resetPending()">↩️ Reset pending</button>
+      </div>
+      <a href="https://github.com/ahpigeon-coder/Worldcup-pool/edit/main/data/stats.json" target="_blank" style="display:inline-block; margin-top:10px; color:var(--accent); font-size:13px">→ Open stats.json on GitHub (for paste fallback)</a>
+      <div id="status"></div>
+    </div>
+
+    <!-- Cheat sheet -->
+    <details class="card">
+      <summary>📜 Current overrides JSON (preview)</summary>
+      <div>
+        <pre id="json-preview"></pre>
+      </div>
+    </details>
+  </div>
+</main>
+
+<script>
+// =============== CONFIG ===============
+const REPO_OWNER = "ahpigeon-coder";
+const REPO_NAME = "Worldcup-pool";
+const STATS_PATH = "data/stats.json";
+const PASSWORD = "wc2026"; // change here if you want
+
+const LS_OVERRIDES = "commish_pending_overrides";
+const LS_PAT = "commish_github_pat";
+const LS_UNLOCKED = "commish_unlocked";
+
+// =============== STATE ===============
+let stats = null;
+let baselineOverrides = {}; // overrides as they exist in GitHub right now
+let pendingOverrides = {};  // overrides being edited locally (full set)
+
+// =============== AUTH ===============
+function unlock() {
+  const pw = document.getElementById("pw").value;
+  if (pw === PASSWORD) {
+    sessionStorage.setItem(LS_UNLOCKED, "1");
+    showPanel();
+  } else {
+    alert("Wrong password.");
+  }
+}
+function isUnlocked() { return sessionStorage.getItem(LS_UNLOCKED) === "1"; }
+function showPanel() {
+  document.getElementById("auth-card").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+  loadStats();
+  renderPat();
+}
+
+// =============== PAT ===============
+function getPat() { return localStorage.getItem(LS_PAT) || ""; }
+function savePat() {
+  const v = document.getElementById("pat").value.trim();
+  if (!v) { alert("Paste a token first."); return; }
+  localStorage.setItem(LS_PAT, v);
+  document.getElementById("pat").value = "";
+  renderPat();
+  setStatus("PAT saved (stored in browser only).", "ok");
+}
+function clearPat() {
+  localStorage.removeItem(LS_PAT);
+  renderPat();
+  setStatus("PAT cleared.", "info");
+}
+function renderPat() {
+  const pill = document.getElementById("pat-pill");
+  if (getPat()) { pill.textContent = "saved"; pill.style.background = "var(--good)"; }
+  else { pill.textContent = "unset"; pill.style.background = "var(--accent-2)"; pill.style.color = "#fff"; }
+}
+
+// =============== STATS LOAD ===============
+async function loadStats() {
+  setStatus("Loading current stats from GitHub...", "info");
+  try {
+    // Use GitHub API to bypass raw URL cache
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${STATS_PATH}?ref=main`;
+    const r = await fetch(url, { headers: { "Accept": "application/vnd.github.raw+json" }});
+    if (!r.ok) throw new Error(`GitHub API ${r.status}`);
+    stats = await r.json();
+    baselineOverrides = JSON.parse(JSON.stringify(stats.manualOverrides || {}));
+    // Load pending from localStorage if any
+    const saved = localStorage.getItem(LS_OVERRIDES);
+    pendingOverrides = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(baselineOverrides));
+    renderRows();
+    setStatus(`Loaded. Last sync: ${stats.lastSynced || "(unknown)"}`, "ok");
+  } catch (e) {
+    setStatus("Failed to load stats: " + e.message, "err");
+  }
+}
+
+// =============== RENDER ===============
+function renderRows() {
+  const wrap = document.getElementById("rows");
+  if (!stats) { wrap.textContent = "No data loaded."; return; }
+  const teams = stats.teams || {};
+  const pot2 = Object.entries(teams).filter(([k,t]) => t.pot === 2).sort((a,b) => a[0].localeCompare(b[0]));
+  wrap.innerHTML = pot2.map(([team, t]) => {
+    const cur = effectiveValue(team, t);
+    const pendG = pendingOverrides[team]?.superstarGoals !== undefined;
+    const pendA = pendingOverrides[team]?.superstarAssists !== undefined;
+    return `<div class="row">
+      <div>
+        <div class="team-name">${escapeHtml(team)}</div>
+        <div class="superstar">⭐ ${escapeHtml(t.superstar || "(no superstar)")}</div>
+      </div>
+      <div class="counter">
+        <button class="minus" onclick="adjust('${escapeAttr(team)}','superstarGoals',-1)">−</button>
+        <span class="val ${pendG?'pending':''}">${cur.goals}</span>
+        <button class="plus" onclick="adjust('${escapeAttr(team)}','superstarGoals',1)">+</button>
+      </div>
+      <div class="counter">
+        <button class="minus" onclick="adjust('${escapeAttr(team)}','superstarAssists',-1)">−</button>
+        <span class="val ${pendA?'pending':''}">${cur.assists}</span>
+        <button class="plus" onclick="adjust('${escapeAttr(team)}','superstarAssists',1)">+</button>
+      </div>
+    </div>`;
+  }).join("");
+  renderJsonPreview();
+}
+
+function effectiveValue(team, teamStat) {
+  // Use pending override if any, otherwise team stat (which already has baseline overrides applied by sync)
+  const goalsOverride = pendingOverrides[team]?.superstarGoals;
+  const assistsOverride = pendingOverrides[team]?.superstarAssists;
+  return {
+    goals: goalsOverride !== undefined ? goalsOverride : (teamStat.superstarGoals || 0),
+    assists: assistsOverride !== undefined ? assistsOverride : (teamStat.superstarAssists || 0)
+  };
+}
+
+function adjust(team, field, delta) {
+  const t = stats.teams[team];
+  if (!t) return;
+  if (!pendingOverrides[team]) pendingOverrides[team] = {};
+  const cur = pendingOverrides[team][field] !== undefined ? pendingOverrides[team][field] : (t[field] || 0);
+  const next = Math.max(0, cur + delta);
+  pendingOverrides[team][field] = next;
+  localStorage.setItem(LS_OVERRIDES, JSON.stringify(pendingOverrides));
+  renderRows();
+}
+
+function resetPending() {
+  if (!confirm("Discard all pending (uncommitted) changes?")) return;
+  pendingOverrides = JSON.parse(JSON.stringify(baselineOverrides));
+  localStorage.setItem(LS_OVERRIDES, JSON.stringify(pendingOverrides));
+  renderRows();
+  setStatus("Pending changes discarded.", "info");
+}
+
+function renderJsonPreview() {
+  document.getElementById("json-preview").textContent = JSON.stringify(pendingOverrides, null, 2);
+}
+
+// =============== COMMIT ================
+async function commit() {
+  const pat = getPat();
+  if (!pat) {
+    setStatus("No PAT saved. Use 'Copy stats.json' fallback below.", "err");
+    return;
+  }
+  if (!stats) {
+    setStatus("Stats not loaded.", "err");
+    return;
+  }
+  const btn = document.getElementById("btn-commit");
+  btn.disabled = true;
+  setStatus("Committing to GitHub...", "info");
+  try {
+    // Build new stats.json with pending overrides
+    const newStats = JSON.parse(JSON.stringify(stats));
+    newStats.manualOverrides = pendingOverrides;
+    // Also apply to teams immediately so leaderboard reflects right away
+    for (const [team, fields] of Object.entries(pendingOverrides)) {
+      if (newStats.teams[team]) {
+        for (const [k, v] of Object.entries(fields)) {
+          newStats.teams[team][k] = v;
+        }
+      }
+    }
+    const content = JSON.stringify(newStats, null, 2) + "\n";
+
+    // GitHub API: get current SHA
+    const shaUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${STATS_PATH}?ref=main`;
+    const shaR = await fetch(shaUrl, { headers: { Authorization: `token ${pat}` }});
+    if (!shaR.ok) throw new Error(`SHA fetch ${shaR.status}: ${(await shaR.text()).slice(0,200)}`);
+    const shaJson = await shaR.json();
+    const sha = shaJson.sha;
+
+    // Encode content as base64 (UTF-8 safe)
+    const utf8 = new TextEncoder().encode(content);
+    const b64 = btoa(String.fromCharCode(...utf8));
+
+    // PUT to update
+    const putR = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${STATS_PATH}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${pat}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: `commish: superstar overrides ${new Date().toISOString().slice(0,19)}`,
+        content: b64,
+        sha: sha,
+        branch: "main"
+      })
+    });
+    if (!putR.ok) throw new Error(`Commit failed ${putR.status}: ${(await putR.text()).slice(0,300)}`);
+
+    // Sync local state
+    baselineOverrides = JSON.parse(JSON.stringify(pendingOverrides));
+    stats = newStats;
+    setStatus("✅ Committed! Live dashboard updates within ~30 sec.", "ok");
+  } catch (e) {
+    setStatus("Commit failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copyJSON() {
+  if (!stats) { setStatus("Load stats first.", "err"); return; }
+  const newStats = JSON.parse(JSON.stringify(stats));
+  newStats.manualOverrides = pendingOverrides;
+  for (const [team, fields] of Object.entries(pendingOverrides)) {
+    if (newStats.teams[team]) {
+      for (const [k, v] of Object.entries(fields)) {
+        newStats.teams[team][k] = v;
+      }
+    }
+  }
+  const text = JSON.stringify(newStats, null, 2);
+  navigator.clipboard.writeText(text).then(
+    () => setStatus("📋 Copied full stats.json. Open the GitHub link below, select-all, paste, commit.", "ok"),
+    () => setStatus("Copy failed. Use the JSON preview below to copy manually.", "err")
+  );
+}
+
+// =============== UTIL ===============
+function setStatus(msg, kind) {
+  const el = document.getElementById("status");
+  el.className = "status " + (kind || "info");
+  el.textContent = msg;
+}
+function escapeHtml(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function escapeAttr(s) { return escapeHtml(s).replace(/'/g, "\\'"); }
+
+// =============== BOOT ===============
+if (isUnlocked()) showPanel();
+document.getElementById("pw").addEventListener("keydown", e => { if (e.key === "Enter") unlock(); });
+</script>
+</body>
+</html>
+
