@@ -112,6 +112,9 @@ for (const a of draw.assignments) {
 }
 
 // ---- core sync -------------------------------------------------------------
+// Cache so we only fetch /matches/{id} once per fixture
+const matchDetailCache = new Map();
+
 async function main() {
   const notes = [];
 
@@ -219,10 +222,13 @@ async function processMatch(m) {
     }
 
     // Superstar goals/assists (Pot 2 only)
-    if (ts.pot === 2 && ts.superstar && (m.goals?.length || m.scorers?.length)) {
-      // /competitions/X/matches returns a summary; full goal list requires /matches/{id}
+    // football-data.org match summary doesn't include goalscorers — must fetch /matches/{id}
+    if (ts.pot === 2 && ts.superstar) {
       try {
-        const detail = await apiGet(`/matches/${m.id}`);
+        if (!matchDetailCache.has(m.id)) {
+          matchDetailCache.set(m.id, await apiGet(`/matches/${m.id}`));
+        }
+        const detail = matchDetailCache.get(m.id);
         const goals = detail.goals || [];
         for (const g of goals) {
           const scorerTeamName = g.team?.name;
@@ -301,3 +307,4 @@ main().catch(err => {
   writeStats("error", `Sync crashed: ${err.message}`);
   process.exit(1);
 });
+
