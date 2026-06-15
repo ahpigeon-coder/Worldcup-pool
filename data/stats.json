@@ -38,8 +38,8 @@
       "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
-      "superstarAssists": 0
+      "superstarGoals": 1,
+      "superstarAssists": 2
     },
     "South Africa": {
       "team": "South Africa",
@@ -152,7 +152,7 @@
       "cleanSheets": 1,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
+      "superstarGoals": 1,
       "superstarAssists": 0
     },
     "Jordan": {
@@ -722,7 +722,7 @@
       "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
+      "superstarGoals": 1,
       "superstarAssists": 0
     },
     "Australia": {
@@ -916,5 +916,17 @@
       "superstarAssists": 0
     }
   },
-  "manualOverrides": {}
+  "manualOverrides": {
+    "Ivory Coast": {
+      "superstarGoals": 1
+    },
+    "Switzerland": {
+      "superstarGoals": 1,
+      "superstarAssists": 0
+    },
+    "Sweden": {
+      "superstarGoals": 1,
+      "superstarAssists": 2
+    }
+  }
 }
