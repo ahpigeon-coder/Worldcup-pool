@@ -295,7 +295,7 @@ function renderJsonPreview() {
   document.getElementById("json-preview").textContent = JSON.stringify(pendingOverrides, null, 2);
 }
 
-// =============== COMMIT ================
+// =============== COMMIT ===============
 async function commit() {
   const pat = getPat();
   if (!pat) {
@@ -323,12 +323,17 @@ async function commit() {
     }
     const content = JSON.stringify(newStats, null, 2) + "\n";
 
-    // GitHub API: get current SHA
-    const shaUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${STATS_PATH}?ref=main`;
-    const shaR = await fetch(shaUrl, { headers: { Authorization: `token ${pat}` }});
-    if (!shaR.ok) throw new Error(`SHA fetch ${shaR.status}: ${(await shaR.text()).slice(0,200)}`);
-    const shaJson = await shaR.json();
-    const sha = shaJson.sha;
+    // Get current SHA via Git Trees API
+    // (Contents API for a .json file returns raw content, not the envelope with sha)
+    const refR = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/ref/heads/main`, { headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github+json" }});
+    if (!refR.ok) throw new Error(`Ref fetch ${refR.status}: ${(await refR.text()).slice(0,200)}`);
+    const refJ = await refR.json();
+    const treeR = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${refJ.object.sha}?recursive=1`, { headers: { Authorization: `token ${pat}`, Accept: "application/vnd.github+json" }});
+    if (!treeR.ok) throw new Error(`Tree fetch ${treeR.status}: ${(await treeR.text()).slice(0,200)}`);
+    const treeJ = await treeR.json();
+    const entry = treeJ.tree.find(e => e.path === STATS_PATH);
+    if (!entry) throw new Error(`${STATS_PATH} not found in tree`);
+    const sha = entry.url.split("/").pop();
 
     // Encode content as base64 (UTF-8 safe)
     const utf8 = new TextEncoder().encode(content);
