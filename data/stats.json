@@ -836,7 +836,7 @@
       "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
+      "superstarGoals": 1,
       "superstarAssists": 0
     },
     "Algeria": {
@@ -927,6 +927,9 @@
     "Sweden": {
       "superstarGoals": 1,
       "superstarAssists": 2
+    },
+    "Austria": {
+      "superstarGoals": 1
     }
   }
 }
