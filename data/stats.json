@@ -437,7 +437,7 @@
       "cleanSheets": 1,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
+      "superstarGoals": 3,
       "superstarAssists": 0
     },
     "DR Congo": {
@@ -723,7 +723,7 @@
       "pkWins": 0,
       "underdogWins": 0,
       "superstarGoals": 1,
-      "superstarAssists": 0
+      "superstarAssists": 1
     },
     "Australia": {
       "team": "Australia",
@@ -922,7 +922,7 @@
     },
     "Switzerland": {
       "superstarGoals": 1,
-      "superstarAssists": 0
+      "superstarAssists": 1
     },
     "Sweden": {
       "superstarGoals": 1,
@@ -930,6 +930,9 @@
     },
     "Austria": {
       "superstarGoals": 1
+    },
+    "Canada": {
+      "superstarGoals": 3
     }
   }
 }
