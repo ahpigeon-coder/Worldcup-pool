@@ -893,8 +893,8 @@
       "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 0,
-      "superstarAssists": 0
+      "superstarGoals": 1,
+      "superstarAssists": 1
     },
     "Iran": {
       "team": "Iran",
@@ -933,6 +933,10 @@
     },
     "Canada": {
       "superstarGoals": 3
+    },
+    "Egypt": {
+      "superstarGoals": 1,
+      "superstarAssists": 1
     }
   }
 }
