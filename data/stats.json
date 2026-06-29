@@ -1,5 +1,5 @@
 {
-  "lastSynced": "2026-06-29T18:23:06.178Z",
+  "lastSynced": "2026-06-29T20:57:36.317Z",
   "lastSyncStatus": "ok",
   "lastSyncMessage": "Sync successful. fetched 104 matches; processed standings.",
   "teams": {
@@ -407,8 +407,8 @@
       "pot": 1,
       "superstar": null,
       "groupFinish": 0,
-      "advancedKO": false,
-      "wonR32": false,
+      "advancedKO": true,
+      "wonR32": true,
       "wonR16": false,
       "wonQF": false,
       "wonSF": false,
