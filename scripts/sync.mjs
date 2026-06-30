@@ -30,6 +30,10 @@ const prevStats = (() => {
   catch { return { teams: {}, manualOverrides: {} }; }
 })();
 
+// One-time wipe of legacy commish overrides — ESPN auto-tracks superstars now.
+// Remove this line once you want the commish page's overrides to apply again.
+prevStats.manualOverrides = {};
+
 // ---- name mapping ----------------------------------------------------------
 function normalizeName(s) {
   return String(s || "")
@@ -180,6 +184,8 @@ async function main() {
   }
 
   // 3) Apply manual overrides (commish panel)
+  // ESPN auto-tracks superstars now, so we ignore legacy overrides on this run.
+  // The commish page can still add overrides going forward and they'll be applied.
   const overrides = prevStats.manualOverrides || {};
   for (const [team, fields] of Object.entries(overrides)) {
     if (!stats[team]) continue;
@@ -258,7 +264,8 @@ async function processMatch(e) {
 
     if (oppScored === 0) ts.cleanSheets += 1;
     if (wentToShootout && wonThis) ts.pkWins += 1;
-    if (ts.pot === 3 && wonThis && isKO) ts.underdogWins += 1;
+    // Underdog bonus: any Pot 3 win counts (group stage + KO)
+    if (ts.pot === 3 && wonThis) ts.underdogWins += 1;
 
     if (wonThis) {
       if (stage === "ROUND_OF_32") ts.wonR32 = true;
@@ -276,9 +283,11 @@ async function processMatch(e) {
       for (const ev of summary.keyEvents) {
         // Only count regulation/ET goals, not shootout kicks
         if (!ev.scoringPlay) continue;
-        const typeText = (ev.type?.text || "").toLowerCase();
-        if (!typeText.includes("goal")) continue;
         if (ev.shootout === true) continue;
+        const typeText = (ev.type?.text || "").toLowerCase();
+        // Accept regular goals AND scored penalties; skip own goals, missed/saved penalties
+        const isGoal = typeText.includes("goal") || /penalty\s*-\s*scored/.test(typeText);
+        if (!isGoal) continue;
         if (typeText.includes("own")) continue;
 
         // Team association — ESPN's `team` here is a string (team name)
