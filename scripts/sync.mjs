@@ -1,18 +1,14 @@
 #!/usr/bin/env node
 /**
- * Sync script — pulls World Cup 2026 data from football-data.org
- * and computes per-team stats. Writes data/stats.json.
+ * Sync script — pulls World Cup 2026 data from ESPN's free public API
+ * (no auth required) and computes per-team stats. Writes data/stats.json.
  *
- * Required env vars:
- *   FOOTBALL_DATA_TOKEN — your free API token from https://www.football-data.org/client/register
- *                        (store as a GitHub Secret named FOOTBALL_DATA_TOKEN)
+ * No env vars required. The legacy FOOTBALL_DATA_TOKEN secret is ignored.
  *
- * Run via:
- *   npm run sync
- *   or:  FOOTBALL_DATA_TOKEN=xxx node scripts/sync.mjs
- *
- * Safe to run before the tournament starts — it will simply write a
- * stats.json reflecting "no matches yet" and exit cleanly.
+ * Endpoints used:
+ *   GET /apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=YYYYMMDD-YYYYMMDD
+ *   GET /apis/v2/sports/soccer/fifa.world/standings?season=2026   (site.web.api host)
+ *   GET /apis/site/v2/sports/soccer/fifa.world/summary?event={id}
  */
 
 import fs from "node:fs";
@@ -22,14 +18,13 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "..", "data");
 
-const TOKEN = process.env.FOOTBALL_DATA_TOKEN;
-const API_BASE = "https://api.football-data.org/v4";
-// football-data.org competition code for FIFA World Cup
-const COMPETITION = "WC";
+const SITE_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world";
+const WEB_BASE  = "https://site.web.api.espn.com/apis/v2/sports/soccer/fifa.world";
+const TOURNAMENT_DATES = "20260611-20260719";
 const SEASON = 2026;
 
 const config = JSON.parse(fs.readFileSync(path.join(dataDir, "config.json"), "utf8"));
-const draw = JSON.parse(fs.readFileSync(path.join(dataDir, "draw.json"), "utf8"));
+const draw   = JSON.parse(fs.readFileSync(path.join(dataDir, "draw.json"), "utf8"));
 const prevStats = (() => {
   try { return JSON.parse(fs.readFileSync(path.join(dataDir, "stats.json"), "utf8")); }
   catch { return { teams: {}, manualOverrides: {} }; }
@@ -39,7 +34,7 @@ const prevStats = (() => {
 function normalizeName(s) {
   return String(s || "")
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "")
     .trim();
 }
@@ -56,26 +51,40 @@ for (const canonical of allTeams) {
   for (const alias of aliases) nameMap[normalizeName(alias)] = canonical;
 }
 
+// ESPN-specific aliases we know about (so we don't have to touch config.json)
+const ESPN_ALIASES = {
+  "Türkiye":         ["Turkey", "Turkiye"],
+  "Bosnia & Herz.":  ["Bosnia and Herzegovina", "Bosnia & Herzegovina", "Bosnia-Herzegovina", "Bosnia"],
+  "DR Congo":        ["Congo DR", "DR Congo", "Democratic Republic of the Congo", "Congo"],
+  "Ivory Coast":     ["Côte d'Ivoire", "Cote d'Ivoire", "Cote dIvoire"],
+  "Cape Verde":      ["Cabo Verde"],
+  "South Korea":     ["Korea Republic", "Korea Rep.", "Republic of Korea"],
+  "Czechia":         ["Czech Republic"],
+  "USA":             ["United States", "United States of America"],
+  "Curaçao":         ["Curacao"]
+};
+for (const [canonical, aliases] of Object.entries(ESPN_ALIASES)) {
+  if (!allTeams.has(canonical)) continue;
+  for (const alias of aliases) nameMap[normalizeName(alias)] = canonical;
+}
+
 function mapTeam(apiName) {
   return nameMap[normalizeName(apiName)] || null;
 }
 
 // ---- HTTP ------------------------------------------------------------------
-async function apiGet(endpoint) {
-  if (!TOKEN) throw new Error("Missing FOOTBALL_DATA_TOKEN env var");
-  const url = API_BASE + endpoint;
+async function espnGet(url) {
   const res = await fetch(url, {
-    headers: { "X-Auth-Token": TOKEN }
+    headers: { "User-Agent": "Mozilla/5.0 (wc-pool-sync)" }
   });
   if (res.status === 429) {
-    // rate limited — back off 70s and retry once
-    console.log("Rate-limited; sleeping 70s and retrying...");
-    await new Promise(r => setTimeout(r, 70_000));
-    return apiGet(endpoint);
+    console.log("Rate-limited; sleeping 10s and retrying...");
+    await new Promise(r => setTimeout(r, 10_000));
+    return espnGet(url);
   }
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`API ${endpoint} → ${res.status}: ${body.slice(0, 300)}`);
+    throw new Error(`ESPN ${url} → ${res.status}: ${body.slice(0, 300)}`);
   }
   return await res.json();
 }
@@ -111,55 +120,66 @@ for (const a of draw.assignments) {
   stats[a.pot3] = blankTeamStat(3, a.pot3, null);
 }
 
-// ---- core sync -------------------------------------------------------------
-// Cache so we only fetch /matches/{id} once per fixture
-const matchDetailCache = new Map();
+// Track which team names we have a Pot 2 superstar for (need detailed summary)
+const pot2Teams = new Set();
+for (const ts of Object.values(stats)) {
+  if (ts.pot === 2 && ts.superstar) pot2Teams.add(ts.team);
+}
 
+// ---- stage mapping ---------------------------------------------------------
+function mapStage(slug) {
+  switch ((slug || "").toLowerCase()) {
+    case "group-stage":     return "GROUP_STAGE";
+    case "round-of-32":     return "ROUND_OF_32";
+    case "round-of-16":     return "ROUND_OF_16";
+    case "quarterfinals":   return "QUARTER_FINALS";
+    case "semifinals":      return "SEMI_FINALS";
+    case "3rd-place-match": return "THIRD_PLACE";
+    case "final":           return "FINAL";
+    default: return "";
+  }
+}
+
+// ---- core sync -------------------------------------------------------------
 async function main() {
   const notes = [];
 
-  if (!TOKEN) {
-    console.log("⚠️  No FOOTBALL_DATA_TOKEN set — writing placeholder stats.json.");
-    writeStats("no-api-key", "FOOTBALL_DATA_TOKEN not configured. Add it to GitHub Secrets to enable live sync.");
-    return;
-  }
-
-  // --- matches ---
-  let matchesResp;
+  // 1) Scoreboard for the whole tournament window
+  let sb;
   try {
-    matchesResp = await apiGet(`/competitions/${COMPETITION}/matches?season=${SEASON}`);
-    notes.push(`fetched ${matchesResp.matches?.length || 0} matches`);
+    sb = await espnGet(`${SITE_BASE}/scoreboard?dates=${TOURNAMENT_DATES}&limit=200`);
   } catch (err) {
-    console.error("Matches fetch failed:", err.message);
-    writeStats("error", `Matches fetch failed: ${err.message}`);
+    writeStats("error", `Scoreboard fetch failed: ${err.message}`);
     return;
   }
+  const events = sb.events || [];
+  notes.push(`fetched ${events.length} events`);
 
-  const matches = matchesResp.matches || [];
-  if (matches.length === 0) {
-    writeStats("no-matches", `No matches found for WC ${SEASON} yet. Check again after the fixtures are published.`);
-    return;
+  const finished = events.filter(e => e.status?.type?.state === "post");
+  console.log(`Processing ${finished.length} finished events of ${events.length} total`);
+
+  for (const e of finished) {
+    await processMatch(e);
   }
 
-  // Process each finished match
-  const finished = matches.filter(m => m.status === "FINISHED");
-  console.log(`Processing ${finished.length} finished matches (of ${matches.length} total)`);
-
-  for (const m of finished) {
-    await processMatch(m);
-  }
-
-  // --- standings (for group finish) ---
+  // 2) Standings (group finishes)
   try {
-    const standingsResp = await apiGet(`/competitions/${COMPETITION}/standings?season=${SEASON}`);
-    processStandings(standingsResp);
-    notes.push(`processed standings`);
+    const standings = await espnGet(`${WEB_BASE}/standings?season=${SEASON}`);
+    processStandings(standings);
+    notes.push("processed standings");
   } catch (err) {
     console.warn("Standings fetch failed (non-fatal):", err.message);
     notes.push(`standings failed: ${err.message}`);
   }
 
-  // --- apply manual overrides ---
+  // Anyone with any KO result has advanced
+  for (const ts of Object.values(stats)) {
+    if (ts.wonR32 || ts.wonR16 || ts.wonQF || ts.wonSF || ts.wonFinal || ts.wonThirdPlace || ts.lostFinal) {
+      ts.advancedKO = true;
+    }
+  }
+
+  // 3) Apply manual overrides (commish panel)
   const overrides = prevStats.manualOverrides || {};
   for (const [team, fields] of Object.entries(overrides)) {
     if (!stats[team]) continue;
@@ -168,108 +188,146 @@ async function main() {
     }
   }
 
-  writeStats("ok", `Sync successful. ${notes.join("; ")}.`);
+  writeStats("ok", `ESPN sync successful. ${notes.join("; ")}.`);
 }
 
-async function processMatch(m) {
-  const home = mapTeam(m.homeTeam?.name);
-  const away = mapTeam(m.awayTeam?.name);
-  if (!home && !away) return;
+// summary cache so each event is fetched at most once per run
+const summaryCache = new Map();
+async function getSummary(eventId) {
+  if (summaryCache.has(eventId)) return summaryCache.get(eventId);
+  const j = await espnGet(`${SITE_BASE}/summary?event=${eventId}`);
+  summaryCache.set(eventId, j);
+  return j;
+}
 
-  const stage = (m.stage || "").toUpperCase();        // e.g. GROUP_STAGE, LAST_16, QUARTER_FINALS, SEMI_FINALS, FINAL, THIRD_PLACE
-  const group = (m.group || "").toUpperCase();
+async function processMatch(e) {
+  const comp = e.competitions?.[0];
+  if (!comp) return;
 
-  const fullHome = m.score?.fullTime?.home ?? 0;
-  const fullAway = m.score?.fullTime?.away ?? 0;
-  const penHome = m.score?.penalties?.home;
-  const penAway = m.score?.penalties?.away;
-  const wentToShootout = penHome != null && penAway != null;
+  const competitors = comp.competitors || [];
+  const homeC = competitors.find(c => c.homeAway === "home") || competitors[0];
+  const awayC = competitors.find(c => c.homeAway === "away") || competitors[1];
+  if (!homeC || !awayC) return;
 
+  const homeName = mapTeam(homeC.team?.displayName) || mapTeam(homeC.team?.name) || mapTeam(homeC.team?.shortDisplayName);
+  const awayName = mapTeam(awayC.team?.displayName) || mapTeam(awayC.team?.name) || mapTeam(awayC.team?.shortDisplayName);
+  if (!homeName && !awayName) return;  // neither team is in our pool
+
+  const homeScore = parseInt(homeC.score, 10) || 0;
+  const awayScore = parseInt(awayC.score, 10) || 0;
+  const stage = mapStage(e.season?.slug);
+
+  // Winner (ESPN flips `winner` boolean even when decided by PKs)
   let winner = null;
-  if (wentToShootout) {
-    winner = penHome > penAway ? "home" : "away";
-  } else if (m.score?.winner === "HOME_TEAM") winner = "home";
-  else if (m.score?.winner === "AWAY_TEAM") winner = "away";
-  else if (fullHome > fullAway) winner = "home";
-  else if (fullAway > fullHome) winner = "away";
+  if (homeC.winner === true) winner = "home";
+  else if (awayC.winner === true) winner = "away";
+  else if (homeScore > awayScore) winner = "home";
+  else if (awayScore > homeScore) winner = "away";
+
+  // Detect PK shootout — ESPN sets status.type.name === "STATUS_FINAL_PEN" when decided by PKs
+  const isKO = stage && stage !== "GROUP_STAGE";
+  const compStatus = comp.status?.type || {};
+  const wentToShootout = isKO && (
+    compStatus.name === "STATUS_FINAL_PEN" ||
+    /pen/i.test(compStatus.detail || "") ||
+    /penalt/i.test(compStatus.description || "")
+  );
+
+  // Fetch summary only if we need superstar goal data (Pot 2 team in this match)
+  const needSummary = pot2Teams.has(homeName) || pot2Teams.has(awayName);
+  let summary = null;
+  if (needSummary) {
+    try {
+      summary = await getSummary(e.id);
+    } catch (err) {
+      console.warn(`summary fetch failed for event ${e.id}:`, err.message);
+    }
+  }
 
   for (const side of ["home", "away"]) {
-    const teamName = side === "home" ? home : away;
+    const teamName = side === "home" ? homeName : awayName;
     if (!teamName || !stats[teamName]) continue;
     const ts = stats[teamName];
 
-    const key = `${m.id}:${side}`;
+    const key = `${e.id}:${side}`;
     if (ts._matchesProcessed.includes(key)) continue;
     ts._matchesProcessed.push(key);
 
     const wonThis = winner === side;
-    const oppScored = side === "home" ? fullAway : fullHome;
+    const oppScored = side === "home" ? awayScore : homeScore;
 
     if (oppScored === 0) ts.cleanSheets += 1;
     if (wentToShootout && wonThis) ts.pkWins += 1;
-    if (ts.pot === 3 && wonThis) ts.underdogWins += 1;
+    if (ts.pot === 3 && wonThis && isKO) ts.underdogWins += 1;
 
-    // Round mapping
     if (wonThis) {
-      if (stage === "ROUND_OF_32" || stage === "LAST_32") ts.wonR32 = true;
-      else if (stage === "ROUND_OF_16" || stage === "LAST_16") ts.wonR16 = true;
+      if (stage === "ROUND_OF_32") ts.wonR32 = true;
+      else if (stage === "ROUND_OF_16") ts.wonR16 = true;
       else if (stage === "QUARTER_FINALS") ts.wonQF = true;
       else if (stage === "SEMI_FINALS") ts.wonSF = true;
-      else if (stage === "THIRD_PLACE" || stage === "3RD_PLACE_FINAL" || stage === "THIRD_PLACE_FINAL") ts.wonThirdPlace = true;
+      else if (stage === "THIRD_PLACE") ts.wonThirdPlace = true;
       else if (stage === "FINAL") ts.wonFinal = true;
-    } else {
-      if (stage === "FINAL") ts.lostFinal = true;
+    } else if (stage === "FINAL") {
+      ts.lostFinal = true;
     }
 
-    // Superstar goals/assists (Pot 2 only)
-    // football-data.org match summary doesn't include goalscorers — must fetch /matches/{id}
-    if (ts.pot === 2 && ts.superstar) {
-      try {
-        if (!matchDetailCache.has(m.id)) {
-          matchDetailCache.set(m.id, await apiGet(`/matches/${m.id}`));
-        }
-        const detail = matchDetailCache.get(m.id);
-        const goals = detail.goals || [];
-        for (const g of goals) {
-          const scorerTeamName = g.team?.name;
-          if (scorerTeamName && mapTeam(scorerTeamName) !== teamName) continue;
-          if (namesMatch(g.scorer?.name, ts.superstar)) {
-            if ((g.type || "").toUpperCase() !== "OWN") ts.superstarGoals += 1;
-          }
-          if (namesMatch(g.assist?.name, ts.superstar)) {
-            ts.superstarAssists += 1;
-          }
-        }
-      } catch (err) {
-        console.warn(`Match detail fetch failed for ${m.id}:`, err.message);
+    // Superstar goals/assists for Pot 2
+    if (ts.pot === 2 && ts.superstar && summary?.keyEvents) {
+      for (const ev of summary.keyEvents) {
+        // Only count regulation/ET goals, not shootout kicks
+        if (!ev.scoringPlay) continue;
+        const typeText = (ev.type?.text || "").toLowerCase();
+        if (!typeText.includes("goal")) continue;
+        if (ev.shootout === true) continue;
+        if (typeText.includes("own")) continue;
+
+        // Team association — ESPN's `team` here is a string (team name)
+        const evTeamName = mapTeam(typeof ev.team === "string" ? ev.team : ev.team?.displayName);
+        if (evTeamName !== teamName) continue;
+
+        const scorer = ev.participants?.[0]?.athlete?.displayName
+                    || ev.participants?.[0]?.athlete?.fullName
+                    || ev.athletesInvolved?.[0]?.displayName;
+        const assist = ev.participants?.[1]?.athlete?.displayName
+                    || ev.participants?.[1]?.athlete?.fullName
+                    || ev.athletesInvolved?.[1]?.displayName;
+
+        if (namesMatch(scorer, ts.superstar)) ts.superstarGoals += 1;
+        if (namesMatch(assist, ts.superstar)) ts.superstarAssists += 1;
       }
     }
   }
 }
 
 function processStandings(resp) {
-  const standings = resp.standings || [];
-  for (const grp of standings) {
-    // type is usually "TOTAL" — we care about table rows
-    if (grp.type && grp.type !== "TOTAL") continue;
-    const table = grp.table || [];
-    for (const row of table) {
-      const team = mapTeam(row.team?.name);
-      if (!team || !stats[team]) continue;
-      const played = row.playedGames ?? 0;
-      if (played >= 3) {
-        const pos = Number(row.position) || 0;
-        if (pos >= 1 && pos <= 4) stats[team].groupFinish = pos;
+  // Shape: { children: [ { name:"Group A", standings: { entries: [ { team, stats } ] } } ] }
+  const children = resp.children || resp.standings?.children || [];
+  for (const grp of children) {
+    const entries = grp.standings?.entries || grp.entries || [];
+    for (const entry of entries) {
+      const teamName =
+        mapTeam(entry.team?.displayName) ||
+        mapTeam(entry.team?.name) ||
+        mapTeam(entry.team?.shortDisplayName);
+      if (!teamName || !stats[teamName]) continue;
+
+      const statsArr = entry.stats || [];
+      const getStat = (...names) => {
+        for (const n of names) {
+          const s = statsArr.find(x => x.name === n || x.shortDisplayName === n || x.type === n);
+          if (s) return Number(s.value);
+        }
+        return null;
+      };
+      const rank   = getStat("rank", "P");
+      const played = getStat("gamesPlayed", "GP") ?? 0;
+
+      if (played >= 3 && rank && rank >= 1 && rank <= 4) {
+        stats[teamName].groupFinish = rank;
       }
-      if (stats[team].groupFinish === 1 || stats[team].groupFinish === 2) {
-        stats[team].advancedKO = true;
+      if (stats[teamName].groupFinish === 1 || stats[teamName].groupFinish === 2) {
+        stats[teamName].advancedKO = true;
       }
-    }
-  }
-  // Anyone who has a KO result advanced
-  for (const ts of Object.values(stats)) {
-    if (ts.wonR32 || ts.wonR16 || ts.wonQF || ts.wonSF || ts.wonFinal || ts.wonThirdPlace || ts.lostFinal) {
-      ts.advancedKO = true;
     }
   }
 }
@@ -278,10 +336,15 @@ function namesMatch(apiName, configName) {
   if (!apiName || !configName) return false;
   const a = normalizeName(apiName);
   const b = normalizeName(configName);
+  if (!a || !b) return false;
   if (a === b) return true;
-  const lastA = a.split(/\s+/).pop();
-  const lastB = b.split(/\s+/).pop();
-  if (lastA && lastB && lastA === lastB && Math.min(a.length, b.length) >= 4) return true;
+  // last-name fallback: split original strings by whitespace
+  const lastA = String(apiName).trim().split(/\s+/).pop();
+  const lastB = String(configName).trim().split(/\s+/).pop();
+  if (lastA && lastB && normalizeName(lastA) === normalizeName(lastB) &&
+      Math.min(normalizeName(lastA).length, normalizeName(lastB).length) >= 4) {
+    return true;
+  }
   return false;
 }
 
@@ -299,7 +362,7 @@ function writeStats(status, message) {
     manualOverrides: prevStats.manualOverrides || {}
   };
   fs.writeFileSync(path.join(dataDir, "stats.json"), JSON.stringify(final, null, 2));
-  console.log(`✅ stats.json written (${status}): ${message}`);
+  console.log(`stats.json written (${status}): ${message}`);
 }
 
 main().catch(err => {
@@ -307,4 +370,3 @@ main().catch(err => {
   writeStats("error", `Sync crashed: ${err.message}`);
   process.exit(1);
 });
-
