@@ -1,5 +1,5 @@
 {
-  "lastSynced": "2026-06-30T01:03:43.620Z",
+  "lastSynced": "2026-06-30T01:12:30.581Z",
   "lastSyncStatus": "ok",
   "lastSyncMessage": "ESPN sync successful. fetched 104 events; processed standings.",
   "teams": {
@@ -39,7 +39,7 @@
       "pkWins": 0,
       "underdogWins": 0,
       "superstarGoals": 1,
-      "superstarAssists": 2
+      "superstarAssists": 3
     },
     "South Africa": {
       "team": "South Africa",
@@ -56,7 +56,7 @@
       "lostFinal": false,
       "cleanSheets": 1,
       "pkWins": 0,
-      "underdogWins": 0,
+      "underdogWins": 1,
       "superstarGoals": 0,
       "superstarAssists": 0
     },
@@ -437,7 +437,7 @@
       "cleanSheets": 2,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 3,
+      "superstarGoals": 4,
       "superstarAssists": 1
     },
     "DR Congo": {
@@ -455,7 +455,7 @@
       "lostFinal": false,
       "cleanSheets": 0,
       "pkWins": 0,
-      "underdogWins": 0,
+      "underdogWins": 1,
       "superstarGoals": 0,
       "superstarAssists": 0
     },
@@ -723,7 +723,7 @@
       "pkWins": 0,
       "underdogWins": 0,
       "superstarGoals": 1,
-      "superstarAssists": 1
+      "superstarAssists": 2
     },
     "Australia": {
       "team": "Australia",
@@ -740,7 +740,7 @@
       "lostFinal": false,
       "cleanSheets": 2,
       "pkWins": 0,
-      "underdogWins": 0,
+      "underdogWins": 1,
       "superstarGoals": 0,
       "superstarAssists": 0
     },
@@ -836,7 +836,7 @@
       "cleanSheets": 0,
       "pkWins": 0,
       "underdogWins": 0,
-      "superstarGoals": 1,
+      "superstarGoals": 2,
       "superstarAssists": 0
     },
     "Algeria": {
@@ -854,7 +854,7 @@
       "lostFinal": false,
       "cleanSheets": 0,
       "pkWins": 0,
-      "underdogWins": 0,
+      "underdogWins": 1,
       "superstarGoals": 0,
       "superstarAssists": 0
     },
@@ -894,7 +894,7 @@
       "pkWins": 0,
       "underdogWins": 0,
       "superstarGoals": 1,
-      "superstarAssists": 1
+      "superstarAssists": 2
     },
     "Iran": {
       "team": "Iran",
@@ -916,27 +916,5 @@
       "superstarAssists": 0
     }
   },
-  "manualOverrides": {
-    "Ivory Coast": {
-      "superstarGoals": 1
-    },
-    "Switzerland": {
-      "superstarGoals": 1,
-      "superstarAssists": 1
-    },
-    "Sweden": {
-      "superstarGoals": 1,
-      "superstarAssists": 2
-    },
-    "Austria": {
-      "superstarGoals": 1
-    },
-    "Canada": {
-      "superstarGoals": 3
-    },
-    "Egypt": {
-      "superstarGoals": 1,
-      "superstarAssists": 1
-    }
-  }
+  "manualOverrides": {}
 }
