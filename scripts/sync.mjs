@@ -30,10 +30,6 @@ const prevStats = (() => {
   catch { return { teams: {}, manualOverrides: {} }; }
 })();
 
-// One-time wipe of legacy commish overrides — ESPN auto-tracks superstars now.
-// Remove this line once you want the commish page's overrides to apply again.
-prevStats.manualOverrides = {};
-
 // ---- name mapping ----------------------------------------------------------
 function normalizeName(s) {
   return String(s || "")
@@ -164,6 +160,19 @@ async function main() {
 
   for (const e of finished) {
     await processMatch(e);
+  }
+
+  // Mark any team that appears in an R32 fixture (played or scheduled) as advanced.
+  // In WC 2026 (48 teams), the 32 R32 teams = top 2 from each of 12 groups + 8 best 3rd-place teams.
+  // Sourcing advancement from the R32 bracket catches those 3rd-place advancers automatically.
+  for (const e of events) {
+    if (e.season?.slug !== "round-of-32") continue;
+    const comp = e.competitions?.[0];
+    if (!comp) continue;
+    for (const c of (comp.competitors || [])) {
+      const name = mapTeam(c.team?.displayName) || mapTeam(c.team?.name) || mapTeam(c.team?.shortDisplayName);
+      if (name && stats[name]) stats[name].advancedKO = true;
+    }
   }
 
   // 2) Standings (group finishes)
