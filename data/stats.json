@@ -1,5 +1,5 @@
 {
-  "lastSynced": "2026-07-03T19:41:54.369Z",
+  "lastSynced": "2026-07-03T21:17:54.507Z",
   "lastSyncStatus": "ok",
   "lastSyncMessage": "ESPN sync successful. fetched 104 events; processed standings.",
   "teams": {
@@ -883,7 +883,7 @@
       "superstar": "Mohamed Salah",
       "groupFinish": 2,
       "advancedKO": true,
-      "wonR32": false,
+      "wonR32": true,
       "wonR16": false,
       "wonQF": false,
       "wonSF": false,
@@ -891,7 +891,7 @@
       "wonThirdPlace": false,
       "lostFinal": false,
       "cleanSheets": 0,
-      "pkWins": 0,
+      "pkWins": 1,
       "underdogWins": 0,
       "superstarGoals": 1,
       "superstarAssists": 2
