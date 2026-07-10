@@ -1,5 +1,5 @@
 {
-  "lastSynced": "2026-07-10T19:46:24.124Z",
+  "lastSynced": "2026-07-10T21:14:42.177Z",
   "lastSyncStatus": "ok",
   "lastSyncMessage": "ESPN sync successful. fetched 104 events; processed standings.",
   "teams": {
@@ -467,7 +467,7 @@
       "advancedKO": true,
       "wonR32": true,
       "wonR16": true,
-      "wonQF": false,
+      "wonQF": true,
       "wonSF": false,
       "wonFinal": false,
       "wonThirdPlace": false,
