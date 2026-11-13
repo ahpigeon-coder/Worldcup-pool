@@ -1,5 +1,5 @@
 {
-  "lastSynced": "2026-11-12T18:07:32.124Z",
+  "lastSynced": "2026-11-13T00:07:05.475Z",
   "lastSyncStatus": "error",
   "lastSyncMessage": "Scoreboard fetch failed: ESPN https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=200 → 400: {\"code\":400,\"message\":\"Failed to get events endpoint.\"}",
   "teams": {
